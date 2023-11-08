@@ -6,6 +6,7 @@
     background-color: rgba(255, 255, 255, 0.13);
     padding: 10px;
     border-radius: 15px;
+    text-align: center;
 }
 #Tutorial {
     position: absolute;
@@ -184,9 +185,11 @@
     }
     #Tutorial{
         width: 250px;
+        height: 10px;
     }
     .Heading{
         width: 275px;
+        height: 10px;
     }
     .WordBox{
         top: 30%;

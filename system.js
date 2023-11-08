@@ -12,6 +12,7 @@ var lastWordId = -1 //0 is first index of list
 var streak = 0
 var correctAnswers = 0
 var incorrectAnswers = 0
+var hintState = 0
 var upperCase = false
 var inputFocus = false
 var checkMode = false
@@ -41,8 +42,8 @@ function OnStartup(){
 }
 
 function UpdateBars(){
-    streakBar.innerText = "Série správných odpovědí: " + streak
-    caBar.innerText = "Správné odpovědi: " + correctAnswers
+    streakBar.innerText = "Série správných odpovědí bez nápověd: " + streak
+    caBar.innerText = "Správné odpovědi bez nápověd: " + correctAnswers
     iaBar.innerText = "Nesprávné odpovědi: " + incorrectAnswers
     return
 }
@@ -55,9 +56,14 @@ function GiveHint(){
         if (member == "der" || member == "die" || member == "das"){
             len += 4
         }
+        len += hintState
+        if (len > deWord.length){
+            len = deWord.length
+        }
         var finishedHint = deWord.slice(0, len)
         var inputWord = document.getElementById("InputText")
         inputWord.value = finishedHint
+        hintState += 1
     }
     hintButton.style.backgroundColor = "rgb(0, 0, 0)"
 }
@@ -74,6 +80,7 @@ function RemoveIncorrectWord(wordId){
 }
 
 function GenerateNewWord(){
+    hintState = 0
     var word = document.getElementById("GivenWord")
     word.innerText = GetRandomWord()
 }
@@ -129,7 +136,7 @@ function SubmitAnswer(){
         var inputWord = document.getElementById("InputText")
         //console.log(correctAnswer + " " + toString(inputWord.innerText))
         if (inputWord.value == correctAnswer){
-            CorrectAnswer(inputWord)
+            CorrectAnswer(inputWord, correctAnswer)
         }
         else{
             WrongAnswer(inputWord, correctAnswer)
@@ -137,7 +144,7 @@ function SubmitAnswer(){
     }
 }
 
-function CorrectAnswer(userInputBar){
+function CorrectAnswer(userInputBar, correctAnswer){
     var idFound = false
     for (var wordId of incorrectWords){
         if (wordId == choseWordId){
@@ -151,8 +158,10 @@ function CorrectAnswer(userInputBar){
     userInputBar.style.color = "rgb(0, 255, 0)"
     submitButton.innerText = "Další"
     checkMode = true
-    streak += 1
-    correctAnswers += 1
+    if (hintState == 0){
+        correctAnswers += 1
+        streak += 1
+    }
     UpdateBars()
 }
 function WrongAnswer(userInputBar, correctAnswer){
