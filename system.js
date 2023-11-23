@@ -7,6 +7,7 @@ var iaBar = document.getElementById("IncorrectAnswers")
 var flipWords = document.getElementById("FlipWords")
 let czWords = []
 let deWords = []
+let altWords = []
 let incorrectWords = []
 let wordFrequency = []
 var choseWordId = 0
@@ -21,7 +22,9 @@ var checkMode = false
 var defualtMode = true
 
 //startup
-LoadFile("lekce7.json")
+flipWords.innerText = "<->"
+
+LoadFile("lekce8.json")
 
 document.body.addEventListener("keydown", (key) =>{
     OnKeyDown(key)
@@ -59,6 +62,12 @@ function LoadFile(fileName){
             for(var word of data.words){
                 czWords.push(word.cz)
                 deWords.push(word.de)
+                if (word.alt){
+                    altWords.push(word.alt)
+                }
+                else{
+                    altWords.push("")
+                }
                 wordFrequency.push(0)
             }
             OnStartup()
@@ -70,11 +79,13 @@ function LoadFile(fileName){
 function FlipWords(){
     var tutorial = document.getElementById("Tutorial")
     if (defualtMode){
-        flipWords.innerText = "Čeština => Němčina"
+       // flipWords.innerText = "Čeština => Němčina"
+       flipWords.innerText = "<->"
         tutorial.innerText = "Slovo, které je napsané v němčině, napiš do boxu pod ním česky. Cílem hry je naučit se německá slovíčka."
     }
     else{
-        flipWords.innerText = "Němčina => Čeština"
+        flipWords.innerText = "<->"
+      //  flipWords.innerText = "Němčina => Čeština"
         tutorial.innerText = "Slovo, které je napsané v češtině, napiš do boxu pod ním německy. Cílem hry je naučit se německá slovíčka."
     }
     defualtMode = !defualtMode
@@ -248,11 +259,21 @@ function SubmitAnswer(){
         var inputWord = document.getElementById("InputText")
         //console.log(correctAnswer + " " + toString(inputWord.innerText))
         if (defualtMode){
-            if (inputWord.value == correctAnswer){
-                CorrectAnswer(inputWord, correctAnswer)
+            if (altWords[choseWordId] != ""){
+                if (inputWord.value == correctAnswer || inputWord.value == altWords[choseWordId]){
+                    CorrectAnswer(inputWord, correctAnswer)
+                }
+                else{
+                    WrongAnswer(inputWord, correctAnswer)
+                }
             }
             else{
-                WrongAnswer(inputWord, correctAnswer)
+                if (inputWord.value == correctAnswer){
+                    CorrectAnswer(inputWord, correctAnswer)
+                }
+                else{
+                    WrongAnswer(inputWord, correctAnswer)
+                }
             }
         }
         else{
@@ -294,10 +315,47 @@ function SubmitAnswer(){
                 if (inputWord.value == correctAnswer){
                     c = true
                 }
-                if (correctWords.length > 1){
-                    if (inputWord.value == correctWords[1] + ", " +correctWords[0]){
-                        c = true
+                //
+                cCA = ""
+                let wordsAnswered = []
+                for (var i = 0; i < inputWord.value.length; i++){
+                    var cLetter = inputWord.value.slice(i, i+1)
+                    
+                    if (cLetter == "," || cLetter == "(" || cLetter == ")"){
+                        if (cLetter == "("){
+                            cCA = cCA.slice(0, cCA.length-1)
+                        }
+                        wordsAnswered.push(cCA)
+                        cCA = ""
                     }
+                    else{
+                        if (cLetter == " " && inputWord.value.slice(i-1, i) == ","){
+                            continue
+                        }
+                        else{
+                            cCA += inputWord.value.slice(i, i+1)
+                        }
+                    }
+                }
+                if (cCA != ""){
+                    wordsAnswered.push(cCA)
+                }
+                //
+                var allCorrect = true
+                for (var wordAnswered of wordsAnswered){
+                    var h = false
+                    for (var correctWord of correctWords){
+                        if (correctWord == wordAnswered){
+                            h = true
+                        }
+                    }
+                    if (!h){
+                        allCorrect = false
+                    }
+                }
+
+                if (allCorrect){
+                   c = true
                 }
             }
             if (c){
@@ -391,7 +449,7 @@ function UpperCase(){
         alt_u.innerText = "Alt + 0220"
     }
     else{
-        button.innerText = "Velká písmena"
+        button.innerText = "Velká písmena"  
         a.innerText = "ä"
         o.innerText = "ö"
         u.innerText = "ü"
