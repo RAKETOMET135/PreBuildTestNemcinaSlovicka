@@ -173,6 +173,8 @@
     width: 250px;
     height: 112px;
     font-size: 35px;
+    background-color: #000000;
+    color: #ffffff;
 }
 #FlipWords {
     left: 72%;
@@ -181,6 +183,17 @@
     width: 250px;
     height: 56px;
     font-size: 25px;
+    background-color: #000000;
+    color: #ffffff;
+}
+#SkipAnswer {
+    position: absolute;
+    left: 33%;
+    top: 40%;
+    transform: translate(-50%);
+    width: 75px;
+    height: 112px;
+    font-size: 35px;
 }
 
 .Submit {
@@ -324,5 +337,11 @@
         height: 50px;
         font-size: 11px;
         left: 89%;
+    }
+    #SkipAnswer{
+        width: 50px;
+        height: 50px;
+        font-size: 25px;
+        left: 15%;
     }
 }

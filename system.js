@@ -20,14 +20,21 @@ var upperCase = false
 var inputFocus = false
 var checkMode = false
 var defualtMode = true
+var skipAnswer = false
+var altHolded = false
+var shiftHolded = false
 
 //startup
 flipWords.innerText = "<->"
 
-LoadFile("lekce8.json")
+LoadFile("lekce8_str102-106.json")
 
 document.body.addEventListener("keydown", (key) =>{
     OnKeyDown(key)
+})
+
+document.body.addEventListener("keyup", (key) =>{
+    OnKeyUp(key)
 })
 
 //functions
@@ -76,15 +83,52 @@ function LoadFile(fileName){
     return
 }
 
+async function AutoFocus(){
+    if (!inputFocus){
+        return
+    }
+    var input = document.getElementById("InputText")
+    input.focus()
+    await Wait(0.5)
+    inputFocus = true
+    return
+}
+
+async function OnClickColor(element){
+    element.style.backgroundColor = "#ffffff"
+    element.style.color = "#000000"
+    await Wait(0.2)
+    element.style.backgroundColor = "#000000"
+    element.style.color = "#ffffff"
+}
+
+async function Wait(seconds){
+    return new Promise((resolve) => setTimeout(resolve, seconds*1000))
+}
+
+function SkipAnswer(){
+    var btn = document.getElementById("SkipAnswer")
+    if (!skipAnswer){
+        btn.style.color = "#ffffff"
+        btn.style.backgroundColor = "#000000"
+    }
+    else{
+        btn.style.color = "#000000"
+        btn.style.backgroundColor = "ffffff"
+    }
+    skipAnswer = !skipAnswer
+    AutoFocus()
+}
+
 function FlipWords(){
     var tutorial = document.getElementById("Tutorial")
     if (defualtMode){
        // flipWords.innerText = "Čeština => Němčina"
-       flipWords.innerText = "<->"
+     //  flipWords.innerText = "<->"
         tutorial.innerText = "Slovo, které je napsané v němčině, napiš do boxu pod ním česky. Cílem hry je naučit se německá slovíčka."
     }
     else{
-        flipWords.innerText = "<->"
+      //  flipWords.innerText = "<->"
       //  flipWords.innerText = "Němčina => Čeština"
         tutorial.innerText = "Slovo, které je napsané v češtině, napiš do boxu pod ním německy. Cílem hry je naučit se německá slovíčka."
     }
@@ -100,6 +144,8 @@ function FlipWords(){
     incorrectWords = []
     checkMode = false
     GenerateNewWord()
+    AutoFocus()
+    OnClickColor(document.getElementById("FlipWords"))
 }
 
 function OnStartup(){
@@ -149,6 +195,8 @@ function GiveHint(){
         hintState += 1
     }
     hintButton.style.backgroundColor = "rgb(0, 0, 0)"
+    AutoFocus()
+    OnClickColor(document.getElementById("Hint"))
 }
 
 function AddIncorrectWord(wordId){
@@ -354,7 +402,7 @@ function SubmitAnswer(){
                     }
                 }
 
-                if (allCorrect){
+                if (allCorrect && wordsAnswered.length > 0){
                    c = true
                 }
             }
@@ -369,7 +417,7 @@ function SubmitAnswer(){
                         cAnswer = cW
                     }
                     else{
-                        cAnswer += "/" + cW 
+                        cAnswer += ", " + cW 
                     }
                 }
 
@@ -377,6 +425,8 @@ function SubmitAnswer(){
             }
         }
     }
+    AutoFocus()
+    OnClickColor(document.getElementById("Submit"))
 }
 
 function CorrectAnswer(userInputBar, correctAnswer){
@@ -389,15 +439,23 @@ function CorrectAnswer(userInputBar, correctAnswer){
     if (idFound){
         RemoveIncorrectWord(choseWordId)
     }
-    userInputBar.readOnly = true
-    userInputBar.style.color = "rgb(0, 255, 0)"
-    submitButton.innerText = "Další"
-    checkMode = true
     if (hintState == 0){
         correctAnswers += 1
         streak += 1
     }
     UpdateBars()
+    if (!skipAnswer){
+        userInputBar.readOnly = true
+        userInputBar.style.color = "rgb(0, 255, 0)"
+        submitButton.innerText = "Další"
+        checkMode = true
+    }
+    else{
+        var inputWord = document.getElementById("InputText")
+        inputWord.value = ""
+        inputWord.style.color = "black"
+        GenerateNewWord()
+    }
 }
 function WrongAnswer(userInputBar, correctAnswer){
     userInputBar.readOnly = true
@@ -458,6 +516,8 @@ function UpperCase(){
         alt_u.innerText = "Alt + 0252"
     }
     upperCase = !upperCase
+    AutoFocus()
+    OnClickColor(button)
 }
 
 function AddA(){
@@ -469,6 +529,8 @@ function AddA(){
     else{
         inputWord.value += "ä"
     }
+    AutoFocus()
+    OnClickColor(document.getElementById("A"))
 }
 
 function AddO(){
@@ -480,12 +542,16 @@ function AddO(){
     else{
         inputWord.value += "ö"
     }
+    AutoFocus()
+    OnClickColor(document.getElementById("O"))
 }
 
 function AddSS(){
     if (checkMode) return
     var inputWord = document.getElementById("InputText")
     inputWord.value += "ß"
+    AutoFocus()
+    OnClickColor(document.getElementById("SS"))
 }
 
 function AddU(){
@@ -497,16 +563,68 @@ function AddU(){
     else{
         inputWord.value += "ü"
     }
+    AutoFocus()
+    OnClickColor(document.getElementById("U"))
 }
 
 function AddFocus(){
     inputFocus = true
 }
-function RemoveFocus(){
+async function RemoveFocus(){
+    await Wait(0.5)
     inputFocus = false
 }
 function OnKeyDown(key){
     if (key.key === "Enter" && inputFocus){
         SubmitAnswer()
+    }
+    if (key.key === "Alt"){
+        altHolded = true
+    }
+    if (key.key === "Shift"){
+        shiftHolded = true
+    }
+    //special character shortcuts
+    var inputWord = document.getElementById("InputText")
+    if (key.key === "a" && altHolded){
+        if (checkMode) return
+        inputWord.value += "ä"
+        OnClickColor(document.getElementById("A"))
+    }
+    if (key.key === "o" && altHolded){
+        if (checkMode) return
+        inputWord.value += "ö"
+        OnClickColor(document.getElementById("O"))
+    }
+    if (key.key === "u" && altHolded){
+        if (checkMode) return
+        inputWord.value += "ü"
+        OnClickColor(document.getElementById("U"))
+    }
+    if (key.key === "s" && altHolded || altHolded && key.key === "S"){
+        AddSS()
+    }
+    if (key.key === "A" && altHolded){
+        if (checkMode) return
+        inputWord.value += "Ä"
+        OnClickColor(document.getElementById("A"))
+    }
+    if (key.key === "O" && altHolded){
+        if (checkMode) return
+        inputWord.value += "Ö"
+        OnClickColor(document.getElementById("O"))
+    }
+    if (key.key === "U" && altHolded){
+        if (checkMode) return
+        inputWord.value += "Ü"
+        OnClickColor(document.getElementById("U"))
+    }
+}
+function OnKeyUp(key){
+    if (key.key === "Alt"){
+        altHolded = false
+    }
+    if (key.key === "Shift"){
+        shiftHolded = false
     }
 }
