@@ -45,6 +45,7 @@ function Reset(){
     deWords = []
     incorrectWords = []
     wordFrequency = []
+    altWords = []
     lastWordId = -1
     choseWordId = 0
     hintState = 0
