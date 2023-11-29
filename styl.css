@@ -477,27 +477,27 @@ body{
     }
     .IncorrectIcon{
         left: 54%;
-        top: 62%;
+        top: 67%;
     }
     .CorrectIcon{
         left: 23%;
-        top: 62%;
+        top: 67%;
     }
     .Streak{
         left: 42%;
-        top: 67%;
+        top: 72%;
     }
     #Streak{
         left: 57%;
-        top: 64.5%;
+        top: 69.5%;
     }
     #CorrectAnswers{
         left: 39.65%;
-        top: 59%;
+        top: 64%;
     }
     #IncorrectAnswers{
         left: 71.5%;
-        top: 59%;
+        top: 64%;
     }
     .Selection{
         top: 87%;
@@ -528,6 +528,9 @@ body{
         visibility: visible;
         top: 110%;
         left: 2%;
+    }
+    .Help{
+        top: 50%;
     }
 }
 
