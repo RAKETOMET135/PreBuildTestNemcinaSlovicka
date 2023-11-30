@@ -98,10 +98,40 @@ async function AutoFocus(){
     return
 }
 
+async function DynamicAnswer(ansColor){
+    for (var e of document.getElementsByClassName("Text")){
+        if (e.id == "CorrectAnswers" || e.id == "IncorrectAnswers" || e.id == "Streak" || e.id == "InputText"){
+            continue
+        }
+
+        e.style.color = ansColor
+        e.style.borderColor = ansColor
+    }
+    document.getElementById("InputText").style.borderColor = ansColor
+
+    await Wait(0.15)
+    
+    for (var e of document.getElementsByClassName("Text")){
+        if (e.id == "CorrectAnswers" || e.id == "IncorrectAnswers" || e.id == "Streak" || e.id == "InputText"){
+            continue
+        }
+
+        e.style.color = "#ffffff"
+        e.style.borderColor = "#ffffff"
+    }
+    document.getElementById("InputText").style.borderColor = "yellow"
+}
+
 async function OnClickColor(element){
     element.style.backgroundColor = "#ffffff"
     element.style.color = "transparent"
+    
+    //element.style.transform = "scale(0.5)"
+
     await Wait(0.2)
+    
+    //element.style.transform = "scale(1)"
+
     element.style.backgroundColor = "#000000"
     element.style.color = "#ffffff"
 }
@@ -109,7 +139,11 @@ async function OnClickColor(element){
 async function ColorChange(element, color){
     var oldColor = element.style.color
     element.style.color = color
+    //document.getElementById("CorrectAnswers").style.transform = "scale(1.5)"
+    element.style.transform = "scale(1.5)"
     await Wait(0.2)
+    //document.getElementById("CorrectAnswers").style.transform = "scale(1)"
+    element.style.transform = "scale(1)"
     element.style.color = oldColor
 }
 
@@ -208,6 +242,7 @@ function GiveHint(){
         var finishedHint = deWord.slice(0, len)
         var inputWord = document.getElementById("InputText")
         inputWord.value = finishedHint
+        inputWord.style.color = "rgb(17, 136, 250)"
         hintState += 1
     }
     hintButton.style.backgroundColor = "rgb(0, 0, 0)"
@@ -460,6 +495,11 @@ function CorrectAnswer(userInputBar, correctAnswer){
         streak += 1
         ColorChange(document.getElementById("CorrectAnswers"), "12ff12")
         ColorChange(document.getElementById("Streak"), "orange")
+        DynamicAnswer("rgb(0, 255, 100)")
+    }
+    else if (hintState > 0){
+        //DynamicAnswer("rgb(17, 136, 250)")
+        DynamicAnswer("rgb(0, 200, 255)")
     }
     UpdateBars()
     if (!skipAnswer){
@@ -498,6 +538,7 @@ function WrongAnswer(userInputBar, correctAnswer){
     }
     UpdateBars()
     AddIncorrectWord(choseWordId)
+    DynamicAnswer("rgb(255, 0, 0)")
 }
 
 function HoverEnter(){
@@ -556,6 +597,7 @@ function AddA(){
         inputWord.value += "ä"
     }
     AutoFocus()
+    Focus()
     OnClickColor(document.getElementById("A"))
 }
 
@@ -569,6 +611,7 @@ function AddO(){
         inputWord.value += "ö"
     }
     AutoFocus()
+    Focus()
     OnClickColor(document.getElementById("O"))
 }
 
@@ -577,6 +620,7 @@ function AddSS(){
     var inputWord = document.getElementById("InputText")
     inputWord.value += "ß"
     AutoFocus()
+    Focus()
     OnClickColor(document.getElementById("SS"))
 }
 
@@ -590,7 +634,14 @@ function AddU(){
         inputWord.value += "ü"
     }
     AutoFocus()
+    Focus()
     OnClickColor(document.getElementById("U"))
+}
+
+function Focus(){
+    var inputWord = document.getElementById("InputText")
+
+    inputWord.focus()
 }
 
 function AddFocus(){

@@ -11,13 +11,13 @@
 </head>
 <body background="Images/TestBackgroundDarker.jpg">
     <section class="Top">
-        <h1 class="Heading">Test z německých slovíček</h1>
+        <h1 class="Text Heading">Test z německých slovíček</h1>
         <p class="Text" id="Tutorial">Slovo, které je napsané v češtině, napiš do boxu pod ním německy. Cílem hry je naučit se německá slovíčka.</p>
     </section>
 
-    <section class="GivenWord">
+    <section class="Text GivenWord">
         <p class="Text" id="GivenWord">vzhled</p>
-        <input type="text" id="InputText" spellcheck="false" class="Text" onfocus=AddFocus() onblur=RemoveFocus()>
+        <input type="text" spellcheck="false" id="InputText" class="Text" onfocus=AddFocus() onblur=RemoveFocus()>
         <button id="Submit" class="Text Button" onclick=SubmitAnswer() onmouseenter=HoverEnter() onmouseleave=HoverExit()>✓</button>
     </section>
 
@@ -54,7 +54,7 @@
     <section class="Selection">
         <label for="category" id="categoryInfo" class="Text">Oblast slovíček:</label>
 
-        <select name="category" id="category" onchange=Category()>
+        <select name="category" id="category" class="Text" onchange=Category()>
             <option class="items" value="lekce8_str102-106">Lekce 8 - strana 102-106</option>
             <option class="items" value="lekce8" class="Option">Lekce 8</option>
             <option class="items" value="lekce7" class="Option">Lekce 7</option>
