@@ -85,6 +85,15 @@ function LoadFile(fileName){
     return
 }
 
+function UnFocusColorChange(){
+    if (!inputFocus){
+        document.getElementById("InputText").style.borderColor = "white"
+    }
+    else{
+        document.getElementById("InputText").style.borderColor = "yellow"
+    }
+}
+
 async function AutoFocus(){
     return
 
@@ -119,7 +128,12 @@ async function DynamicAnswer(ansColor){
         e.style.color = "#ffffff"
         e.style.borderColor = "#ffffff"
     }
-    document.getElementById("InputText").style.borderColor = "yellow"
+    if (inputFocus){
+        document.getElementById("InputText").style.borderColor = "yellow"
+    }
+    else{
+        document.getElementById("InputText").style.borderColor = "white"
+    }
 }
 
 async function OnClickColor(element){
