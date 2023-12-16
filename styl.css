@@ -897,7 +897,9 @@ body{
     }
     .Selection{
         top: 87%;
-        left: 17.5%;
+        left: 50%;
+        transform: translate(-50%);
+
         width: 245px;
     }
     #category{
