@@ -16,6 +16,7 @@ var streak = 0
 var correctAnswers = 0
 var incorrectAnswers = 0
 var hintState = 0
+var totalWords = 0
 var upperCase = false
 var inputFocus = false
 var checkMode = false
@@ -27,7 +28,7 @@ var shiftHolded = false
 //startup
 flipWords.innerText = "<->"
 
-LoadFile("lekce8_str102-106.json")
+LoadFile("lekce8_str107-108.json")
 
 document.body.addEventListener("keydown", (key) =>{
     OnKeyDown(key)
@@ -37,7 +38,73 @@ document.body.addEventListener("keyup", (key) =>{
     OnKeyUp(key)
 })
 
+//ChristmasDesign()
+
 //functions
+function ChristmasDesign(){
+    //background
+    var backgroundImages = 4
+    var bg_rn = Math.floor(Math.random() * (backgroundImages))
+    bg_rn += 1
+    
+    var backgroundName = "Background_" + bg_rn + ".jpg"
+
+    document.body.background = "Images/ChristmasImages/" + backgroundName
+
+    //buttons
+    var buttons = []
+    for (var button of document.getElementsByClassName("EBtn")){
+        buttons.push(button)
+    }
+    for (var button of document.getElementsByClassName("ALT")){
+        buttons.push(button)
+    }
+    buttons.push(document.getElementById("HintMobile"))
+
+    for (var button of buttons){
+        button.style.backgroundImage = "url(Images/ChristmasImages/ButtonBackground.jpg)"
+        button.onmouseenter = function(){
+             this.style.backgroundImage = "url(Images/ChristmasImages/ButtonHoverBackground.jpg)"
+        }
+        button.onmouseleave = function(){
+            this.style.backgroundImage = "url(Images/ChristmasImages/ButtonBackground.jpg)"
+        }
+    }
+
+    submitButton.style.backgroundImage = "url(Images/ChristmasImages/ButtonHoverBackground.jpg)"
+
+    //other
+    var givenWords = document.getElementsByClassName("GivenWord")
+    for (var givenWord of givenWords){
+        givenWord.style.backgroundImage = "url(Images/ChristmasImages/GivenWordBackground.jpg)"
+    }
+    var cetegory = document.getElementById("Category")
+    category.style.backgroundImage = "url(Images/ChristmasImages/ButtonBackground.jpg)"
+    var inputText = document.getElementById("InputText")
+    inputText.style.backgroundImage = "url(Images/ChristmasImages/InputWordBackground.jpg)"
+
+    //decorations
+    if (!CheckUserScreenWidth()){
+        var christmasTree = document.createElement("img")
+        christmasTree.src = "Images/ChristmasImages/ChristmasTree.gif"
+        document.body.appendChild(christmasTree)
+        christmasTree.style.width = "200px"
+        christmasTree.style.height = "200px"
+        christmasTree.style.position = "Absolute"
+        christmasTree.style.right = "5%"
+        christmasTree.style.top = "35%"
+
+        var candyCane = document.createElement("img")
+        candyCane.src = "Images/ChristmasImages/CandyCane.gif"
+        document.body.appendChild(candyCane)
+        candyCane.style.width = "200px"
+        candyCane.style.height = "200px"
+        candyCane.style.position = "Absolute"
+        candyCane.style.left = "5%"
+        candyCane.style.top = "35%"
+    }
+}
+
 function Reset(){
     streak = 0; correctAnswers = 0; incorrectAnswers = 0; UpdateBars()
     checkMode = false
@@ -87,10 +154,10 @@ function LoadFile(fileName){
 
 function UnFocusColorChange(){
     if (!inputFocus){
-        document.getElementById("InputText").style.borderColor = "white"
+        //document.getElementById("InputText").style.borderColor = "white"
     }
     else{
-        document.getElementById("InputText").style.borderColor = "yellow"
+        //document.getElementById("InputText").style.borderColor = "yellow"
     }
 }
 
@@ -117,8 +184,30 @@ async function DynamicAnswer(ansColor){
         e.style.borderColor = ansColor
     }
     document.getElementById("InputText").style.borderColor = ansColor
+    for (var r of document.getElementsByClassName("Selection")){
+        r.style.borderColor = ansColor
+    }
+
+    var cAnsText = document.getElementById("CorrectAnswers")
+    var CABorder = document.getElementById("CABorder")
+    var iAnsText = document.getElementById("IncorrectAnswers")
+    var IABorder = document.getElementById("IABorder")
+    if (ansColor == "rgb(0, 255, 100)"){
+        CABorder.style.animation = "pulse"
+        CABorder.style.animationDuration = "0.15s"
+    }
+    else if (ansColor == "rgb(255, 0, 0)"){
+        IABorder.style.animation = "pulse2"
+        IABorder.style.animationDuration = "0.15s"
+    }
+
+    //animation: glow 1s ease-in-out infinite;
+    //animation: pulse 0.2s linear infinite;
 
     await Wait(0.15)
+
+    CABorder.style.animation = "none"
+    IABorder.style.animation = "none"
     
     for (var e of document.getElementsByClassName("Text")){
         if (e.id == "CorrectAnswers" || e.id == "IncorrectAnswers" || e.id == "Streak" || e.id == "InputText"){
@@ -127,6 +216,9 @@ async function DynamicAnswer(ansColor){
 
         e.style.color = "#ffffff"
         e.style.borderColor = "#ffffff"
+    }
+    for (var r of document.getElementsByClassName("Selection")){
+        r.style.borderColor = "white"
     }
     if (inputFocus){
         document.getElementById("InputText").style.borderColor = "yellow"
@@ -276,6 +368,7 @@ function RemoveIncorrectWord(wordId){
 }
 
 function GenerateNewWord(){
+    totalWords += 1
     hintState = 0
     var word = document.getElementById("GivenWord")
     word.innerText = GetRandomWord()
@@ -357,7 +450,7 @@ function GetRandomWord(){
 }
 
 function SubmitAnswer(){
-    submitButton.style.backgroundColor = "rgb(0, 0, 0)"
+    /*submitButton.style.backgroundColor = "rgb(0, 0, 0)"*/
     if (submitButton.innerText == "➔"){
         submitButton.innerText = "✓"
         var inputWord = document.getElementById("InputText")
@@ -556,10 +649,10 @@ function WrongAnswer(userInputBar, correctAnswer){
 }
 
 function HoverEnter(){
-    submitButton.style.backgroundColor = "rgb(25, 25, 25)"
+    //submitButton.style.backgroundColor = "rgb(25, 25, 25)"
 }
 function HoverExit(){
-    submitButton.style.backgroundColor = "rgb(0, 0, 0)"
+    //submitButton.style.backgroundColor = "rgb(0, 0, 0)"
 }
 
 function HoverEnter2(){
@@ -680,35 +773,36 @@ function OnKeyDown(key){
     if (key.key === "a" && altHolded){
         if (checkMode) return
         inputWord.value += "ä"
-        OnClickColor(document.getElementById("A"))
+        //OnClickColor(document.getElementById("A"))
     }
     if (key.key === "o" && altHolded){
         if (checkMode) return
         inputWord.value += "ö"
-        OnClickColor(document.getElementById("O"))
+        //OnClickColor(document.getElementById("O"))
     }
     if (key.key === "u" && altHolded){
         if (checkMode) return
         inputWord.value += "ü"
-        OnClickColor(document.getElementById("U"))
+        //OnClickColor(document.getElementById("U"))
     }
     if (key.key === "s" && altHolded || altHolded && key.key === "S"){
-        AddSS()
+        if (checkMode) return
+        inputWord.value += "ß"
     }
     if (key.key === "A" && altHolded){
         if (checkMode) return
         inputWord.value += "Ä"
-        OnClickColor(document.getElementById("A"))
+        //OnClickColor(document.getElementById("A"))
     }
     if (key.key === "O" && altHolded){
         if (checkMode) return
         inputWord.value += "Ö"
-        OnClickColor(document.getElementById("O"))
+       // OnClickColor(document.getElementById("O"))
     }
     if (key.key === "U" && altHolded){
         if (checkMode) return
         inputWord.value += "Ü"
-        OnClickColor(document.getElementById("U"))
+        //OnClickColor(document.getElementById("U"))
     }
 }
 function OnKeyUp(key){
