@@ -435,11 +435,11 @@ body{
     border-radius: 15px;
     top: 110%;
     left: -200%;
-    cursor: url("Cursors/ClickCursor.png"), auto;
     animation-name: wiggle;
     animation-duration: 5s;
     animation-delay: 5s;
     animation-iteration-count: infinite;
+    cursor: url("Cursors/HintSelectCursor.png"), auto;
 }
 #Hint:hover {
     rotate: 10deg;
