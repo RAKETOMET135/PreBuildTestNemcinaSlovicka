@@ -1,3 +1,4 @@
+/*napsat k tlacitkum a par prvkum transition all 0.3s*/
 /*element design and events*/
 *{
     cursor: url("Cursors/DefualtCursor.png"), auto;
@@ -543,6 +544,36 @@ body{
 .button-2:hover {
     rotate: 10deg;
 }
+#voice{
+    position: absolute;
+    left: -7.2%;
+    top: 150%;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 30px;
+    transform: translate(-50%);
+    color: #ffffff;
+    background-color: rgba(3, 102, 28, 0);
+    border-radius: 15px;
+    border: white 2px solid;
+    cursor: url("Cursors/ClickCursor.png"), auto;
+    background: linear-gradient(45deg, rgba(2,0,36,1) 0%, rgba(30,30,30,1) 18%, rgba(50,50,50,1) 45%, rgba(30,30,30,1) 79%, rgba(0,0,0,1) 100%);
+    animation: glowing 20s linear infinite;
+    background-size: 200% 200%;
+    animation: gradient-animation 10s ease infinite;
+    filter: blur(0.1px);
+}
+#voice:hover{
+    left: -7.2%;
+    top: 150%;
+    transform:scale(1.1, 1.1) translate(-42.5%);
+}
+.voice-image{
+    width: 32px;
+    height: 32px;
+    cursor: url("Cursors/ClickCursor.png"), auto;
+}
 
 /*animations*/
 @keyframes glow {
@@ -805,6 +836,13 @@ body{
     }
     .help{
         top: 50%;
+    }
+    #voice{
+        top: 175%;
+        left: -13%;
+    }
+    #voice:hover{
+        transform: scale(1.1, 1.1) translate(-70%, 32.5%) 
     }
 }
 

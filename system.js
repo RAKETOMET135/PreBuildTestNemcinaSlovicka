@@ -117,6 +117,9 @@ const uButton = document.querySelector("#u")
 const oButton = document.querySelector("#o")
 const ssButton = document.querySelector("#ss")
 const warningText = document.querySelector(".warning-text")
+const voiceButton = document.querySelector("#voice")
+const voiceButtonImage = document.querySelector(".voice-image")
+const voiceRepeatButton = document.querySelector("#voice-repeat")
 const hoverElements = [
     new hoverElement(["Další", "Zkontrolovat"], ["60px", "110px"], [submitButton]),
     new hoverElement(["Nápověda"], ["90px"], hintButtons), 
@@ -126,7 +129,8 @@ const hoverElements = [
     new hoverElement(["Přidat A s přehláskou"], ["165px"], [aButton]),
     new hoverElement(["Přidat O s přehláskou"], ["165px"], [oButton]),
     new hoverElement(["Přidat U s přehláskou"], ["165px"], [uButton]),
-    new hoverElement(["Přidat ostré S"], ["115px"], [ssButton])
+    new hoverElement(["Přidat ostré S"], ["115px"], [ssButton]),
+    new hoverElement(["Předčítat slovíčka", "Nepředčítat slovíčka"], ["145px", "165px"], [voiceButton])
 ]
 
 let hoverTextYOffset = -25
@@ -149,6 +153,8 @@ let currentWord
 let prevWord
 let lastIncorrectWord
 
+let tts = false
+let speachText = new SpeechSynthesisUtterance()
 
 function LoadFile(fileName){
     Reset()
@@ -189,6 +195,23 @@ function ResetInputText(){
     }
     else{
         inputText.style.color = "black"
+    }
+}
+
+function SayWord(usedWord){
+    window.speechSynthesis.cancel()
+
+    if (language === "de"){
+        speachText.text = usedWord.czWord
+        speachText.lang = "cs-CS"
+    
+        window.speechSynthesis.speak(speachText)
+    }
+    else{
+        speachText.text = usedWord.deWord
+        speachText.lang = "de-DE"
+    
+        window.speechSynthesis.speak(speachText)
     }
 }
 
@@ -256,11 +279,16 @@ function DisplayWord(){
         if (allIncorrectWords.length > 0) pickedWord = allIncorrectWords[Math.floor(Math.random() * allIncorrectWords.length)]
     }
 
-    if (language === "de"){
-        displayedWord.innerText = pickedWord.czWord
+    if (!tts){
+        if (language === "de"){
+            displayedWord.innerText = pickedWord.czWord
+        }
+        else{
+            displayedWord.innerText = pickedWord.deWord
+        }
     }
     else{
-        displayedWord.innerText = pickedWord.deWord
+       SayWord(pickedWord)
     }
 
     pickedWord.timesDisplayed += 1
@@ -292,6 +320,8 @@ function SubmitUserInput(){
             currentHoverText.style.width = "60px"
         }
     }
+
+    window.speechSynthesis.cancel()
 
     const userInput = inputText.value
 
@@ -469,6 +499,7 @@ async function DynamicAnswer(ansColor){
     }
 
     await Wait(0.15)
+    if (lowDetail) return
 
     caBorder.style.animation = "none"
     caBorder.style.background = "transparent"
@@ -539,6 +570,13 @@ function UpdateHoverText(thisHoverElement, thisElement, hoverText){
     }
     else if (thisElement === upperCaseButton){
         if (upperCase){
+            hoverText.innerText = thisHoverElement.text[1]
+            hoverText.style.width = thisHoverElement.width[1]
+            isDefualtHoverText = false
+        }
+    }
+    else if (thisElement === voiceButton){
+        if (tts){
             hoverText.innerText = thisHoverElement.text[1]
             hoverText.style.width = thisHoverElement.width[1]
             isDefualtHoverText = false
@@ -693,6 +731,8 @@ function LowDetailMode(){
             r.style.borderColor = "black"
         }
         inputTextDiv.style.borderColor = "black"
+        voiceButtonImage.style.width = "32px"
+        voiceButtonImage.style.height = "32px"
     }
     else{
         lowDetail = false
@@ -729,6 +769,7 @@ function LowDetailMode(){
 
 function OnWebsiteStart(){
     flipWordsButton.innerText = "<->"
+    speachText.volume = 1
 
     LoadFile(category.value + ".json")
 }
@@ -736,9 +777,7 @@ function OnWebsiteStart(){
 OnWebsiteStart()
 
 submitButton.addEventListener("click", SubmitUserInput)
-warningText.addEventListener("click", () =>{
-    LowDetailMode()
-})
+warningText.addEventListener("click", LowDetailMode)
 inputText.addEventListener("keydown", (e) =>{
     OnKeyDown(e)
 })
@@ -828,6 +867,47 @@ flipWordsButton.addEventListener("click", () =>{
     isWordInspect = false
     inputText.style.color = "white"
     DisplayWord()
+})
+voiceButton.addEventListener("click", () =>{
+    tts = !tts
+    if (currentHoverText){
+        if (currentHoverText.innerText === "Předčítat slovíčka"){
+            currentHoverText.innerText = "Nepředčítat slovíčka"
+            currentHoverText.style.width = "165px"
+            voiceButtonImage.src = "Images/NoVoiceIcon.png"
+        }
+        else if (currentHoverText.innerText === "Nepředčítat slovíčka"){
+            currentHoverText.innerText = "Předčítat slovíčka"
+            currentHoverText.style.width = "145px"
+            voiceButtonImage.src = "Images/VoiceIcon.png"
+        }
+    }
+
+    if (tts){
+        displayedWord.innerText = ""
+
+        SayWord(currentWord)
+    }
+    else{
+        if (language === "de"){
+            displayedWord.innerText = currentWord.czWord
+        }
+        else{
+            displayedWord.innerText = currentWord.deWord
+        }
+    }
+})
+displayedWord.addEventListener("click", () =>{
+    if (tts){
+        SayWord(currentWord)
+    }
+})
+voiceRepeatButton.addEventListener("click", (e) =>{
+    if (e.target !== this) return
+
+    if (tts){
+        SayWord(currentWord)
+    }
 })
 for (let i = 0; i < hintButtons.length; i++){
     const hintButton = hintButtons[i]
