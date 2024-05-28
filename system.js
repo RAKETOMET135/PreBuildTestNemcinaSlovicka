@@ -120,6 +120,8 @@ const warningText = document.querySelector(".warning-text")
 const voiceButton = document.querySelector("#voice")
 const voiceButtonImage = document.querySelector(".voice-image")
 const voiceRepeatButton = document.querySelector("#voice-repeat")
+const voiceRepeatButtonImage = document.querySelector(".voice-repeat-image")
+const wordListButton = document.querySelector("#word-list-button")
 const hoverElements = [
     new hoverElement(["Další", "Zkontrolovat"], ["60px", "110px"], [submitButton]),
     new hoverElement(["Nápověda"], ["90px"], hintButtons), 
@@ -130,7 +132,8 @@ const hoverElements = [
     new hoverElement(["Přidat O s přehláskou"], ["165px"], [oButton]),
     new hoverElement(["Přidat U s přehláskou"], ["165px"], [uButton]),
     new hoverElement(["Přidat ostré S"], ["115px"], [ssButton]),
-    new hoverElement(["Předčítat slovíčka", "Nepředčítat slovíčka"], ["145px", "165px"], [voiceButton])
+    new hoverElement(["Předčítat slovíčka", "Nepředčítat slovíčka"], ["145px", "165px"], [voiceButton]),
+    new hoverElement(["Zopakovat slovo"], ["125px"], [voiceRepeatButton])
 ]
 
 let hoverTextYOffset = -25
@@ -155,6 +158,8 @@ let lastIncorrectWord
 
 let tts = false
 let speachText = new SpeechSynthesisUtterance()
+
+let isOnLoadDisplay = false
 
 function LoadFile(fileName){
     Reset()
@@ -288,16 +293,24 @@ function DisplayWord(){
         }
     }
     else{
-       SayWord(pickedWord)
+        if (!isWordInspect){
+            SayWord(pickedWord)
+        }
     }
 
-    pickedWord.timesDisplayed += 1
     currentWord = pickedWord
     prevWord = pickedWord
 
     hint = ""
 
     ResetInputText()
+
+    if (isOnLoadDisplay){
+        isOnLoadDisplay = false
+    }
+    else{
+        pickedWord.timesDisplayed += 1
+    }
 }
 
 function SubmitUserInput(){
@@ -454,6 +467,7 @@ function Hint(){
     }
 
     inputText.value = hint
+    inputText.focus()
 }
 
 function DisplayUserStats(){
@@ -589,17 +603,222 @@ function UpdateHoverText(thisHoverElement, thisElement, hoverText){
     }
 }
 
+function SwitchTTS(){
+    tts = !tts
+    if (currentHoverText){
+        if (currentHoverText.innerText === "Předčítat slovíčka"){
+            currentHoverText.innerText = "Nepředčítat slovíčka"
+            currentHoverText.style.width = "165px"
+        }
+        else if (currentHoverText.innerText === "Nepředčítat slovíčka"){
+            currentHoverText.innerText = "Předčítat slovíčka"
+            currentHoverText.style.width = "145px"
+        }
+    }
+
+    if (tts){
+        displayedWord.innerText = ""
+        voiceButtonImage.src = "Images/NoVoiceIcon.png"
+        voiceRepeatButton.style.visibility = "visible"
+
+        if (!isWordInspect){
+            SayWord(currentWord)
+        }
+    }
+    else{
+        if (language === "de"){
+            displayedWord.innerText = currentWord.czWord
+        }
+        else{
+            displayedWord.innerText = currentWord.deWord
+        }
+        voiceButtonImage.src = "Images/VoiceIcon.png"
+        voiceRepeatButton.style.visibility = "hidden"
+    }
+}
+
+function UpperCase(isFocus){
+    upperCase = !upperCase
+
+    if (upperCase){
+        aButton.innerText = "Ä"
+        uButton.innerText = "Ü"
+        oButton.innerText = "Ö"
+
+        if (currentHoverText){
+            currentHoverText.innerText = "Malá písmena"
+        }
+    }
+    else{
+        aButton.innerText = "ä"
+        uButton.innerText = "ü"
+        oButton.innerText = "ö"
+
+        if (currentHoverText){
+            currentHoverText.innerText = "Velká písmena"
+        }
+    }
+
+    if (isFocus){
+        inputText.focus()
+    }
+}
+
+function SkipCorrectAnswer(){
+    skipCorrectWord = !skipCorrectWord
+
+    if (skipCorrectWord){
+        skipCorrectAnswerButton.innerText = "||"
+    }
+    else{
+        skipCorrectAnswerButton.innerText = "≪"
+    }
+}
+
+function CreateWordDataObject(){
+    let wordDataObject = {
+        wordsList: words,
+        wordCategory: currentLoadedFileName,
+        wordStreak: stats.streak,
+        wordHint: stats.hint,
+        wordDisplayed: currentWord,
+        isTTS: tts,
+        isUpperCase: upperCase,
+        language: language,
+        skipCorrectWord: skipCorrectWord,
+        isWordInspect: isWordInspect,
+        userText: inputText.value,
+        userTextColor: inputText.style.color,
+        hint: hint,
+        wordCorrect: stats.correct,
+        wordIncorrect: stats.incorrect,
+        prevWord: prevWord,
+        isLDM: lowDetail
+    }
+
+    sessionStorage.setItem("wordData", JSON.stringify(wordDataObject))
+}
+
+function ShowWordList(){
+    CreateWordDataObject()
+
+    window.location.href = "words_list.html"
+}
+
 function OnFileLoaded(){
+    const wordData = JSON.parse(sessionStorage.getItem("wordData"))
+    let isSessionData = false
+    let userText = ""
+
+    if (wordData){
+        if (wordData.wordsList){
+            words = wordData.wordsList
+
+            stats.correct = wordData.wordCorrect
+            stats.incorrect = wordData.wordIncorrect
+            stats.streak = wordData.wordStreak
+            stats.hint = wordData.wordHint
+        }
+
+        if (wordData.language){
+            language = wordData.language
+        }
+
+        if (wordData.isWordInspect){
+            isWordInspect = wordData.isWordInspect
+        }
+
+        if (wordData.userText){
+            userText = wordData.userText
+        }
+
+        if (wordData.prevWord){
+            prevWord = wordData.prevWord
+        }
+
+        category.value = wordData.wordCategory.slice(6, wordData.wordCategory.length - 5)
+        currentLoadedFileName = wordData.wordCategory
+
+        isSessionData = true
+
+        if (wordData.wordDisplayed){
+            isOnLoadDisplay = true
+        }
+    }
+
     DisplayWord()
+
+    if (isSessionData){
+        if (wordData.isTTS){
+            SwitchTTS()
+        }
+        if (wordData.isUpperCase){
+            UpperCase(false)
+        }
+        if (wordData.skipCorrectWord){
+            SkipCorrectAnswer()
+        }
+
+        if (wordData.wordDisplayed){
+            if (!tts){
+                if (language === "de"){
+                    displayedWord.innerText = wordData.wordDisplayed.czWord
+                }
+                else{
+                    displayedWord.innerText = wordData.wordDisplayed.deWord
+                }
+            }
+            else{
+                if (!isWordInspect){
+                    SayWord(wordData.wordDisplayed)
+                }
+            }
+        
+            currentWord = wordData.wordDisplayed
+            prevWord = wordData.wordDisplayed
+        
+            ResetInputText()
+        }
+
+        inputText.value = userText
+
+        if (wordData.userTextColor){
+            inputText.style.color = wordData.userTextColor
+        }
+        if (isWordInspect){
+            inputText.readOnly = true
+            submitButton.innerText = "➔"
+            if (currentHoverText){
+                if (currentHoverText.innerText === "Zkontrolovat"){
+                    currentHoverText.innerText = "Další"
+                    currentHoverText.style.width = "60px"
+                }
+            }
+        }
+        if (wordData.hint){
+            hint = wordData.hint
+        }
+
+        if (wordData.isLDM){
+            LowDetailMode()
+        }
+    }
+
     DisplayUserStats()
 }
 
 function OnCorrectAnswer(){
-    currentWord.correct += 1
     isWordInspect = true
     if (hint === ""){
         stats.correct += 1
         stats.streak += 1
+        for (let i = 0; i < words.length; i++){
+            const thisWord = words[i]
+
+            if (thisWord.czWord === currentWord.czWord){
+                words[i].correct += 1
+            }
+        }
 
         DynamicAnswer("green")
         ColorChange(correctAnswersText, "green")
@@ -607,6 +826,13 @@ function OnCorrectAnswer(){
     }
     else{
         stats.hint += 1
+        for (let i = 0; i < words.length; i++){
+            const thisWord = words[i]
+
+            if (thisWord.czWord === currentWord.czWord){
+                words[i].timesHintUsed += 1
+            }
+        }
 
         DynamicAnswer("blue")
     }
@@ -630,7 +856,13 @@ function OnCorrectAnswer(){
 }
 
 function OnIncorrectAnswer(){
-    currentWord.incorrect += 1
+    for (let i = 0; i < words.length; i++){
+        const thisWord = words[i]
+
+        if (thisWord.czWord === currentWord.czWord){
+            words[i].incorrect += 1
+        }
+    }
     isWordInspect = true
     stats.incorrect += 1
     stats.streak = 0
@@ -733,6 +965,8 @@ function LowDetailMode(){
         inputTextDiv.style.borderColor = "black"
         voiceButtonImage.style.width = "32px"
         voiceButtonImage.style.height = "32px"
+        voiceRepeatButtonImage.style.width = "32px"
+        voiceRepeatButtonImage.style.height = "32px"
     }
     else{
         lowDetail = false
@@ -770,6 +1004,7 @@ function LowDetailMode(){
 function OnWebsiteStart(){
     flipWordsButton.innerText = "<->"
     speachText.volume = 1
+    voiceRepeatButton.style.visibility = "hidden"
 
     LoadFile(category.value + ".json")
 }
@@ -778,6 +1013,10 @@ OnWebsiteStart()
 
 submitButton.addEventListener("click", SubmitUserInput)
 warningText.addEventListener("click", LowDetailMode)
+skipCorrectAnswerButton.addEventListener("click", SkipCorrectAnswer)
+voiceButton.addEventListener("click", SwitchTTS)
+wordListButton.addEventListener("click", ShowWordList)
+window.addEventListener("beforeunload", CreateWordDataObject)
 inputText.addEventListener("keydown", (e) =>{
     OnKeyDown(e)
 })
@@ -794,65 +1033,46 @@ inputText.addEventListener("onblur", () =>{
     inputFocus = false
     altHolded = false
 })
-skipCorrectAnswerButton.addEventListener("click", () =>{
-    skipCorrectWord = !skipCorrectWord
-
-    if (skipCorrectWord){
-        skipCorrectAnswerButton.innerText = "||"
-    }
-    else{
-        skipCorrectAnswerButton.innerText = "≪"
-    }
-})
 category.addEventListener("change", () =>{
     if (currentLoadedFileName !== category.value + ".json"){
+        sessionStorage.clear()
+
         LoadFile(category.value + ".json")
     }
 })
 upperCaseButton.addEventListener("click", () =>{
-    upperCase = !upperCase
-
-    if (upperCase){
-        aButton.innerText = "Ä"
-        uButton.innerText = "Ü"
-        oButton.innerText = "Ö"
-
-        if (currentHoverText){
-            currentHoverText.innerText = "Malá písmena"
-        }
-    }
-    else{
-        aButton.innerText = "ä"
-        uButton.innerText = "ü"
-        oButton.innerText = "ö"
-
-        if (currentHoverText){
-            currentHoverText.innerText = "Velká písmena"
-        }
-    }
+   UpperCase(true)
 })
 aButton.addEventListener("click", () =>{
     let letter = "ä"
     if (upperCase) letter = "Ä"
 
     InsertAtCursor(inputText, letter)
+
+    inputText.focus()
 })
 uButton.addEventListener("click", () =>{
     let letter = "ü"
     if (upperCase) letter = "Ü"
 
     InsertAtCursor(inputText, letter)
+
+    inputText.focus()
 })
 oButton.addEventListener("click", () =>{
     let letter = "ö"
     if (upperCase) letter = "Ö"
 
     InsertAtCursor(inputText, letter)
+
+    inputText.focus()
 })
 ssButton.addEventListener("click", () =>{
     let letter = "ß"
 
     InsertAtCursor(inputText, letter)
+
+    inputText.focus()
 })
 flipWordsButton.addEventListener("click", () =>{
     if (language === "de") {
@@ -868,45 +1088,16 @@ flipWordsButton.addEventListener("click", () =>{
     inputText.style.color = "white"
     DisplayWord()
 })
-voiceButton.addEventListener("click", () =>{
-    tts = !tts
-    if (currentHoverText){
-        if (currentHoverText.innerText === "Předčítat slovíčka"){
-            currentHoverText.innerText = "Nepředčítat slovíčka"
-            currentHoverText.style.width = "165px"
-            voiceButtonImage.src = "Images/NoVoiceIcon.png"
-        }
-        else if (currentHoverText.innerText === "Nepředčítat slovíčka"){
-            currentHoverText.innerText = "Předčítat slovíčka"
-            currentHoverText.style.width = "145px"
-            voiceButtonImage.src = "Images/VoiceIcon.png"
-        }
-    }
-
-    if (tts){
-        displayedWord.innerText = ""
-
-        SayWord(currentWord)
-    }
-    else{
-        if (language === "de"){
-            displayedWord.innerText = currentWord.czWord
-        }
-        else{
-            displayedWord.innerText = currentWord.deWord
-        }
-    }
-})
 displayedWord.addEventListener("click", () =>{
     if (tts){
         SayWord(currentWord)
     }
 })
-voiceRepeatButton.addEventListener("click", (e) =>{
-    if (e.target !== this) return
-
+voiceRepeatButton.addEventListener("click", () =>{
     if (tts){
         SayWord(currentWord)
+    
+        inputText.focus()
     }
 })
 for (let i = 0; i < hintButtons.length; i++){
